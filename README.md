@@ -1,1 +1,3 @@
 # AVALIACAO-LIVRO-PROJ1
+
+cd demo
