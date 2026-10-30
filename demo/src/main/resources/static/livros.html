@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livros disponíveis</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #1e293b;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #0f172a;
+    }
+    .lista {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .livro {
+      background: #ffffff;
+      border: 1px solid #dfe7f1;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+    .livro h2 {
+      margin: 0 0 8px;
+      font-size: 1.4rem;
+    }
+    .meta {
+      color: #475569;
+      margin: 6px 0;
+      font-size: 0.95rem;
+    }
+    .botoes {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s ease;
+    }
+    button:hover { opacity: 0.92; }
+    .btn-visualizar { background: #2563eb; color: white; }
+    .btn-avaliar { background: #f59e0b; color: #111827; }
+    .avaliacoes {
+      margin-top: 18px;
+      display: none;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .avaliacoes.visible { display: block; }
+    .avaliacao-item {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 8px 0;
+    }
+    .avaliacao-item:last-child { border-bottom: none; }
+    .estrelas { color: #f59e0b; font-size: 1rem; }
+    .form-avaliacao {
+      margin-top: 14px;
+      display: none;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .form-avaliacao.visible { display: block; }
+    .form-avaliacao label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .form-avaliacao input,
+    .form-avaliacao textarea,
+    .form-avaliacao select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.96rem;
+    }
+    .form-avaliacao textarea { min-height: 80px; resize: vertical; }
+    .small { color: #64748b; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de livros disponíveis</h1>
+    <div id="listaLivros" class="lista"></div>
+  </div>
+
+  <script>
+    const listaLivros = document.getElementById('listaLivros');
+
+    function formatarEstrelas(nota) {
+      const valor = Number(nota) || 0;
+      return '★'.repeat(valor) + '☆'.repeat(Math.max(0, 5 - valor));
+    }
+
+    function calcularMedia(avaliacoes) {
+      if (!avaliacoes || avaliacoes.length === 0) return 0;
+      const total = avaliacoes.reduce((soma, item) => soma + Number(item.nota), 0);
+      return (total / avaliacoes.length).toFixed(1);
+    }
+
+    function renderizarLivro(livro) {
+      const card = document.createElement('div');
+      card.className = 'livro';
+
+      const media = calcularMedia(livro.avaliacoes);
+
+      card.innerHTML = `
+        <h2>${livro.titulo}</h2>
+        <div class="meta"><strong>Autor:</strong> ${livro.autor}</div>
+        <div class="meta"><strong>Ano:</strong> ${livro.ano}</div>
+        <div class="meta"><strong>Média:</strong> ${media} / 5</div>
+
+        <div class="botoes">
+          <button class="btn-visualizar" data-acao="visualizar" data-id="${livro.id}">Visualizar avaliações</button>
+          <button class="btn-avaliar" data-acao="avaliar" data-id="${livro.id}">Registrar avaliação</button>
+        </div>
+
+        <div class="avaliacoes" id="avaliacoes-${livro.id}">
+          ${
+            livro.avaliacoes && livro.avaliacoes.length
+              ? livro.avaliacoes.map(item => `
+                  <div class="avaliacao-item">
+                    <div class="estrelas">${formatarEstrelas(item.nota)}</div>
+                    <div>${item.comentario}</div>
+                  </div>
+                `).join('')
+              : '<div class="small">Nenhuma avaliação registrada ainda.</div>'
+          }
+        </div>
+
+        <div class="form-avaliacao" id="form-${livro.id}">
+          <label for="nota-${livro.id}">Nota (1 a 5 estrelas):</label>
+          <select id="nota-${livro.id}">
+            <option value="5">5 estrelas</option>
+            <option value="4">4 estrelas</option>
+            <option value="3">3 estrelas</option>
+            <option value="2">2 estrelas</option>
+            <option value="1">1 estrela</option>
+          </select>
+
+          <label for="comentario-${livro.id}">Comentário:</label>
+          <textarea id="comentario-${livro.id}" placeholder="Digite seu comentário..."></textarea>
+
+          <button class="btn-avaliar" data-acao="salvar" data-id="${livro.id}">Salvar avaliação</button>
+        </div>
+      `;
+
+      return card;
+    }
+
+    async function carregarLivros() {
+      const urls = [
+        'http://localhost:8080/api/livros',
+        'http://127.0.0.1:8080/api/livros',
+        '/api/livros'
+      ];
+
+      let ultimaErro = null;
+
+      for (const url of urls) {
+        try {
+          const resposta = await fetch(url);
+          if (!resposta.ok) {
+            throw new Error('Resposta inválida da API');
+          }
+
+          const livros = await resposta.json();
+          listaLivros.innerHTML = '';
+          livros.forEach(livro => {
+            listaLivros.appendChild(renderizarLivro(livro));
+          });
+          return;
+        } catch (erro) {
+          ultimaErro = erro;
+        }
+      }
+
+      listaLivros.innerHTML = '<div class="small">Erro ao carregar os livros do sistema Java. Verifique se a aplicação Spring está rodando em http://localhost:8080</div>';
+      console.error(ultimaErro);
+    }
+
+    document.addEventListener('click', async function (event) {
+      const botao = event.target.closest('button');
+      if (!botao) return;
+
+      const acao = botao.dataset.acao;
+      const id = Number(botao.dataset.id);
+
+      if (acao === 'visualizar') {
+        const painel = document.getElementById(`avaliacoes-${id}`);
+        if (painel) {
+          painel.classList.toggle('visible');
+        }
+      }
+
+      if (acao === 'avaliar') {
+        const form = document.getElementById(`form-${id}`);
+        if (form) {
+          form.classList.toggle('visible');
+        }
+      }
+
+      if (acao === 'salvar') {
+        const selectNota = document.getElementById(`nota-${id}`);
+        const inputComentario = document.getElementById(`comentario-${id}`);
+
+        const nota = Number(selectNota.value);
+        const comentario = inputComentario.value.trim();
+
+        if (!comentario) {
+          alert('Digite um comentário antes de salvar.');
+          return;
+        }
+
+        try {
+          const urls = [
+            `http://localhost:8080/api/livros/${id}/avaliacoes`,
+            `http://127.0.0.1:8080/api/livros/${id}/avaliacoes`,
+            `/api/livros/${id}/avaliacoes`
+          ];
+
+          let respostaFinal = null;
+          let ultimoErro = null;
+
+          for (const url of urls) {
+            try {
+              const resposta = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nota, comentario })
+              });
+
+              const resultado = await resposta.json();
+              if (!resposta.ok) {
+                throw new Error(resultado.mensagem || 'Erro ao registrar avaliação');
+              }
+
+              respostaFinal = resultado;
+              break;
+            } catch (erro) {
+              ultimoErro = erro;
+            }
+          }
+
+          if (!respostaFinal) {
+            throw ultimoErro || new Error('Erro ao registrar avaliação');
+          }
+          
+          carregarLivros();
+        } catch (erro) {
+          alert(erro.message || 'Erro ao salvar avaliação.');
+        }
+      }
+    });
+
+    carregarLivros();
+  </script>
+</body>
+</html>
