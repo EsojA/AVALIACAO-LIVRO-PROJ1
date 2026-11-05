@@ -87,3 +87,8 @@ AVALIACAO-LIVRO-PROJ1/
 
 ## Objetivo do sistema
 O sistema tem como finalidade demonstrar o uso de Java, Spring Boot e consumo de API REST em um cenário realista de catálogo de livros, com foco em avaliação e feedback dos usuários.
+
+## Integrantes do grupo
+- José Armando Pereira da Conceição
+- Antônio Juvêncio Araujo Garcia
+- Rafael Silva Gregorio Figueredo
