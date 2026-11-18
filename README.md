@@ -8,6 +8,21 @@ Este projeto é uma aplicação web simples para listar livros, exibir avaliaç�
 
 A aplicação combina um back-end em Java com Spring Boot e uma interface front-end estática em HTML, CSS e JavaScript. Os dados são simulados em memória e expostos por uma API REST em `/api/livros`.
 
+## Funcionalidades
+
+- Catálogo de livros com título, autor e ano de publicação.
+- Exibição da média geral de avaliações em uma escala de 1 a 5 estrelas.
+- Visualização das avaliações e comentários registrados para cada livro.
+- Formulário na interface para registrar uma nota e um comentário.
+- Atualização automática da lista e das médias após o envio de uma avaliação.
+- Moderação de comentários pelo `BotModerador`:
+  - comentários vazios não são registrados;
+  - comentários com mais de 500 caracteres são rejeitados;
+  - palavras impróprias configuradas são substituídas por asteriscos;
+  - avaliação com nota válida é criada com o comentário já moderado.
+- Validações da API para livro inexistente, nota inválida e campos obrigatórios.
+- Interface responsiva com cards para os livros e painéis expansíveis de avaliações e formulário.
+
 ## Arquitetura do sistema
 O sistema segue uma arquitetura simples em camadas:
 
@@ -38,6 +53,21 @@ Fluxo principal:
 - `GET /api/livros` - retorna a lista de livros com avaliações, comentários e média
 - `POST /api/livros/{id}/avaliacoes` - registra uma nova avaliação para um livro específico
 
+Exemplo de corpo da requisição `POST`:
+
+```json
+{
+  "nota": 5,
+  "comentario": "Uma leitura excelente!"
+}
+```
+
+A nota deve ser um número entre `1` e `5`. Os campos `nota` e `comentario` são obrigatórios. Em caso de sucesso, a API retorna o status HTTP `200` e a nova média do livro.
+
+## Armazenamento dos dados
+
+Os livros e suas avaliações são carregados em memória pela classe `Livro`. Os dados iniciais são preparados na primeira consulta à API e são mantidos enquanto a aplicação estiver em execução. Reiniciar o servidor restaura o catálogo e as avaliações iniciais.
+
 ## Como executar
 No diretório do projeto:
 
@@ -46,11 +76,11 @@ cd demo
 ./mvnw spring-boot:run
 ```
 
-Se a porta 8080 estiver ocupada, pode usar outra porta:
+Para validar a aplicação antes de iniciar:
 
 ```bash
 cd demo
-PORT=8081 ./mvnw spring-boot:run
+./mvnw test
 ```
 
 Depois, acesse:
@@ -67,7 +97,7 @@ AVALIACAO-LIVRO-PROJ1/
 │   │   ├── main/
 │   │   │   ├── java/com/example/demo/
 │   │   │   │   ├── Avaliacao.java
-│   │   │   │   ├── Bot.java
+│   │   │   │   ├── BotModerador.java
 │   │   │   │   ├── DemoApplication.java
 │   │   │   │   ├── Livro.java
 │   │   │   │   ├── LivroApiController.java
