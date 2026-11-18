@@ -34,7 +34,7 @@ public class Livro {
 
 		Livro livro1 = new Livro(1, "Dom Casmurro", "Machado de Assis", "1899");
 		livro1.adicionarAvaliacao(5, "Excelente leitura, muito envolvente.");
-		livro1.adicionarAvaliacao(4, "Gostei bastante, embora seja um pouco longo.");
+		livro1.adicionarAvaliacao(4, "burro , mas interessante.");
 		livro1.adicionarComentario("Narrativa muito rica e bem construída.");
 		livro1.adicionarComentario("Personagens muito marcantes.");
 		BIBLIOTECA.add(livro1);
@@ -95,27 +95,45 @@ public class Livro {
 		}
 	}
 
-	public void adicionarAvaliacao(float nota, String comentario) {
-		if (nota < 1 || nota > 5) {
-			throw new IllegalArgumentException("A nota deve estar entre 1 e 5 estrelas.");
-		}
+	
+public void adicionarAvaliacao(float nota, String comentario) {
 
-		Avaliacao avaliacao = new Avaliacao();
-		avaliacao.setNota(nota);
-		avaliacao.setComentario(comentario);
-		avaliacao.registrar();
-		this.avaliacoes.add(avaliacao);
-		if (comentario != null && !comentario.trim().isEmpty()) {
-			this.comentarios.add(comentario.trim());
-		}
-	}
+    if (nota < 1 || nota > 5) {
+        throw new IllegalArgumentException("A nota deve estar entre 1 e 5 estrelas.");
+    }
 
+    String comentarioModerado = moderador.moderarComentario(comentario);
+
+    Avaliacao avaliacao = new Avaliacao();
+    avaliacao.setNota(nota);
+    avaliacao.setComentario(comentarioModerado);
+    avaliacao.registrar();
+
+    this.avaliacoes.add(avaliacao);
+
+    if (comentarioModerado != null) {
+        this.comentarios.add(comentarioModerado);
+    }
+}
+
+	
+	private BotModerador moderador = new BotModerador();
 	public void adicionarComentario(String comentario) {
-		if (comentario == null || comentario.trim().isEmpty()) {
-			return;
-		}
-		this.comentarios.add(comentario.trim());
-	}
+
+    String comentarioModerado = moderador.moderarComentario(comentario);
+
+    if (comentarioModerado != null) {
+
+        comentarios.add(comentarioModerado);
+
+        System.out.println("Comentário aprovado e moderado!");
+
+    } else {
+
+        System.out.println("Comentário inválido ou muito longo!");
+
+    }
+}
 
 	public double mediaAvaliacoes() {
 		if (this.avaliacoes.isEmpty()) {
